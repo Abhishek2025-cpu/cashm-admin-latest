@@ -29,8 +29,8 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [credentials, setCredentials] = useState({
-    email: 'admin@cashamsalone.com',
-    password: 'helloo#casham@01032025',
+    email: '', // Changed to empty string
+    password: '', // Changed to empty string
   });
   const [error, setError] = useState('');
 
@@ -62,7 +62,6 @@ const AdminLogin = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json'
         },
- 
       });
 
       console.log('Login response:', response.data);
@@ -370,8 +369,8 @@ const AdminLogin = () => {
               id="email"
               label="Email Address"
               name="email"
-              autoComplete="email"
-              value={credentials.email}
+              // Removed autoComplete="email"
+              // Removed value={credentials.email}
               onChange={handleChange}
               InputProps={{
                 startAdornment: (
@@ -399,8 +398,8 @@ const AdminLogin = () => {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               id="password"
-              autoComplete="current-password"
-              value={credentials.password}
+              // Removed autoComplete="current-password"
+              // Removed value={credentials.password}
               onChange={handleChange}
               InputProps={{
                 startAdornment: (
