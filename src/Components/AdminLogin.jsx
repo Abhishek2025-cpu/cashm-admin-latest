@@ -62,7 +62,7 @@ const AdminLogin = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json'
         },
-        withCredentials: true
+ 
       });
 
       console.log('Login response:', response.data);

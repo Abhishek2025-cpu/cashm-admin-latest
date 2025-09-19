@@ -7,6 +7,7 @@ import Dashboard from './Components/Dashboard'
 import Request from './Components/Request'
 import ApprovedRequest from './Components/ApprovedRequest'
 import AddAgent from './Components/AddAgent'
+import AddBalance from './Components/AddBalace'
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 const RequireAuth = ({ children }) => {
@@ -54,6 +55,14 @@ function App() {
             </RequireAuth>
           }
          />
+          <Route
+          path="/admin/add-balance"
+          element={
+            <RequireAuth>
+              <AddBalance/>
+            </RequireAuth>
+          }
+         /> 
 
         
           <Route path="/" element={<Navigate to="/admin/login" />} />

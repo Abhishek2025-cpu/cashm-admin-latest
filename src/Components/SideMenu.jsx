@@ -44,6 +44,7 @@ const SideMenu = () => {
     { text: 'Add Agent', icon: <Add />, route: '/admin/add-agents' },
     { text: 'Dashboard', icon: <Dashboard />, route: '/admin/dashboard' },
     { text: 'Requests', icon: <ListAlt />, route: '/admin/Requests' },
+    {text:'Add Balance',icon:<Add/>,route:'/admin/add-balance'},
     { text: 'Approved Requests', icon: <CheckCircle />, route: '/admin/approved-requests' },
     { text: 'User Management', icon: <Group />, route: '/user-management' },
     { text: 'Settings', icon: <Settings />, route: '/settings' },
