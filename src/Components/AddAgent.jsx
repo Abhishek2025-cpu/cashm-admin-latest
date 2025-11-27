@@ -18,98 +18,127 @@ const AddAgent = () => {
   const [error, setError] = useState("");
   const [formErrors, setFormErrors] = useState({}); // Track form errors
 
-  const authHeaders = {
-    Authorization: "Basic " + btoa("Pearl:PearlProdChecker@12390"),
+// Use Bearer token instead of Basic Auth
+const authHeaders = {
+  Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+};
+
+// Fetch tokens on mount
+useEffect(() => {
+  const fetchTokens = async () => {
+    try {
+      const res = await fetch(
+        "https://api.cashamsalone.com/admin/gettokens",
+        { headers: authHeaders }
+      );
+      const data = await res.json();
+      setTokens(data);
+    } catch (err) {
+      setError("Failed to fetch tokens.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Fetch tokens on mount
-  useEffect(() => {
-    const fetchTokens = async () => {
-      try {
-        const res = await fetch("https://api.cashamsalone.com/admin/gettokens", { headers: authHeaders });
-        const data = await res.json();
-        setTokens(data);
-      } catch (err) {
-        setError("Failed to fetch tokens.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTokens();
-  }, []);
+  fetchTokens();
+}, []);
 
-  const createToken = async () => {
-    if (!email) {
-      alert("Email is required!");
-      return;
-    }
 
-    try {
-      const res = await fetch(`https://api.cashamsalone.com/admin/generatetoken?mail=${email}`, {
+// Create Token
+const createToken = async () => {
+  if (!email) {
+    alert("Email is required!");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.cashamsalone.com/admin/generatetoken?mail=${email}`,
+      {
         method: "GET",
         headers: authHeaders,
-      });
-      const data = await res.json();
-      alert("Token Created: " + data.token);
-    } catch (err) {
-      setError("Error creating token.");
-    }
-  };
+      }
+    );
 
-  const addUser = async () => {
-    // Form Validation
-    const errors = {};
-    if (!userData.name) errors.name = "Name is required";
-    if (!userData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
-      errors.email = "Valid email is required";
-    }
-    if (!userData.phoneNumber || userData.phoneNumber.length < 10) {
-      errors.phoneNumber = "Phone number must be at least 10 digits";
-    }
-    if (userData.role === "AGENT" && !userData.admintoken) {
-      errors.admintoken = "Admin token is required for agents";
-    }
-    if (userData.role === "MERCHANT" && !userData.address) {
-      errors.address = "Address is required for merchants";
-    }
-    setFormErrors(errors);
+    const data = await res.json();
+    alert("Token Created: " + data.token);
+  } catch (err) {
+    setError("Error creating token.");
+  }
+};
 
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
 
-    const formData = new FormData();
-    formData.append("role", userData.role);
-    formData.append("phoneNumber", userData.phoneNumber);
-    formData.append("email", userData.email);
-    formData.append("name", userData.name);
-    if (userData.role === "AGENT") formData.append("admintoken", userData.admintoken);
-    if (userData.role === "MERCHANT") formData.append("address", userData.address);
+// Add User
+const addUser = async () => {
+  // Form Validation
+  const errors = {};
+  if (!userData.name) errors.name = "Name is required";
+  if (
+    !userData.email ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)
+  ) {
+    errors.email = "Valid email is required";
+  }
+  if (!userData.phoneNumber || userData.phoneNumber.length < 10) {
+    errors.phoneNumber = "Phone number must be at least 10 digits";
+  }
+  if (userData.role === "AGENT" && !userData.admintoken) {
+    errors.admintoken = "Admin token is required for agents";
+  }
+  if (userData.role === "MERCHANT" && !userData.address) {
+    errors.address = "Address is required for merchants";
+  }
 
-    try {
-      const res = await fetch("https://api.cashamsalone.com/admin/addUser", {
+  setFormErrors(errors);
+  if (Object.keys(errors).length > 0) return;
+
+  const formData = new FormData();
+  formData.append("role", userData.role);
+  formData.append("phoneNumber", userData.phoneNumber);
+  formData.append("email", userData.email);
+  formData.append("name", userData.name);
+
+  if (userData.role === "AGENT")
+    formData.append("admintoken", userData.admintoken);
+
+  if (userData.role === "MERCHANT")
+    formData.append("address", userData.address);
+
+  try {
+    const res = await fetch(
+      "https://api.cashamsalone.com/admin/addUser",
+      {
         method: "POST",
-        headers: authHeaders,
+        headers: authHeaders, // Bearer token
         body: formData,
-      });
-      const data = await res.json();
-      alert("User added successfully!");
-    } catch (err) {
-      setError("Error adding user.");
-    }
-  };
+      }
+    );
 
-  const deleteToken = async (tokenId) => {
-    try {
-      await fetch(`https://api.cashamsalone.com/admin/deletetoken?Id=${tokenId}`, {
+    const data = await res.json();
+    alert("User added successfully!");
+  } catch (err) {
+    setError("Error adding user.");
+  }
+};
+
+
+// Delete Token
+const deleteToken = async (tokenId) => {
+  try {
+    await fetch(
+      `https://api.cashamsalone.com/admin/deletetoken?Id=${tokenId}`,
+      {
         method: "DELETE",
         headers: authHeaders,
-      });
-      setTokens(tokens.filter((t) => t.id !== tokenId));
-    } catch (err) {
-      setError("Error deleting token.");
-    }
-  };
+      }
+    );
+
+    setTokens(tokens.filter((t) => t.id !== tokenId));
+  } catch (err) {
+    setError("Error deleting token.");
+  }
+};
+
 
   if (loading) {
     return (

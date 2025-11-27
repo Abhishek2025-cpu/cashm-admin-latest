@@ -8,6 +8,7 @@ import Request from './Components/Request'
 import ApprovedRequest from './Components/ApprovedRequest'
 import AddAgent from './Components/AddAgent'
 import AddBalance from './Components/AddBalace'
+import EventsTable from './Components/Events'
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 const RequireAuth = ({ children }) => {
@@ -63,6 +64,12 @@ function App() {
             </RequireAuth>
           }
          /> 
+          <Route
+          path="/admin/events"
+          element={
+            <EventsTable/>
+          }
+      />
 
         
           <Route path="/" element={<Navigate to="/admin/login" />} />

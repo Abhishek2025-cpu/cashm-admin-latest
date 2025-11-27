@@ -5,6 +5,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from 'react-router-dom';
 import { ImageListItem } from "@mui/material";
 import logoImg from '../assets/cashmLogo.png';
+import { Event } from '@mui/icons-material';
+
+
 
 
 
@@ -43,7 +46,8 @@ const SideMenu = () => {
   const menuItems = [
     { text: 'Add Agent', icon: <Add />, route: '/admin/add-agents' },
     { text: 'Dashboard', icon: <Dashboard />, route: '/admin/dashboard' },
-    { text: 'Requests', icon: <ListAlt />, route: '/admin/Requests' },
+   {text: 'Events', icon: <Event />, route: '/admin/events'},
+{ text: 'Requests', icon: <ListAlt />, route: '/admin/Requests' },
     {text:'Add Balance',icon:<Add/>,route:'/admin/add-balance'},
     { text: 'Approved Requests', icon: <CheckCircle />, route: '/admin/approved-requests' },
     { text: 'User Management', icon: <Group />, route: '/user-management' },

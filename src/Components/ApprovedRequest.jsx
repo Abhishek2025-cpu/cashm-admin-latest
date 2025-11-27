@@ -11,33 +11,36 @@ const ApprovedRequest = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch approved requests
-  useEffect(() => {
-    const fetchApprovedRequests = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.cashamsalone.com/admin/approved-requests",
-          {
-            headers: {
-              Authorization: "Basic UGVhcmw6UGVhcmxQcm9kQ2hlY2tlckAxMjM5MA==",
-              "Content-Type": "application/json",
-            },
-          }
-        );
+useEffect(() => {
+  const fetchApprovedRequests = async () => {
+    try {
+      const token = localStorage.getItem("adminToken");
 
-        setApprovedRequests(response.data);
-      } catch (err) {
-        if (!navigator.onLine) {
-          setError("Network is not connected"); // Handle no internet connection
-        } else {
-          setError("Failed to fetch data");
+      const response = await axios.get(
+        "https://api.cashamsalone.com/admin/approved-requests",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      } finally {
-        setLoading(false);
-      }
-    };
+      );
 
-    fetchApprovedRequests();
-  }, []);
+      setApprovedRequests(response.data);
+    } catch (err) {
+      if (!navigator.onLine) {
+        setError("Network is not connected");
+      } else {
+        setError("Failed to fetch data");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchApprovedRequests();
+}, []);
+
 
   // Filter requests based on search query
   const filteredRequests = approvedRequests.filter((request) =>

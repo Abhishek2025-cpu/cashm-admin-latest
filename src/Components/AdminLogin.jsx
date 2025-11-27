@@ -47,55 +47,63 @@ const AdminLogin = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-    try {
-      const response = await axios({
-        method: 'post',
-        url: `${API_BASE_URL}/admin/login`,
-        data: `email=${encodeURIComponent(credentials.email)}&password=${encodeURIComponent(credentials.password)}`,
+  try {
+    const formData = new URLSearchParams();
+    formData.append('email', credentials.email);
+    formData.append('password', credentials.password);
+
+    const response = await axios.post(
+      `${API_BASE_URL}/admin/login`,
+      formData.toString(),
+      {
         headers: {
-          'Authorization': 'Basic ' + btoa('Pearl:PearlProdChecker@12390'),
           'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json'
-        },
-      });
-
-      console.log('Login response:', response.data);
-
-      if (response.data) {
-        localStorage.setItem('adminToken', 'Bearer ' + response.data.id);
-        localStorage.setItem('adminUser ', JSON.stringify({
-          userName: response.data.userName,
-          email: response.data.email,
-          photo: response.data.photo,
-          id: response.data.id
-        }));
-        
-        setIsSuccess(true);
-        setTimeout(() => {
-          navigate('/admin/dashboard');
-        }, 1500);
+        }
       }
-    } catch (err) {
-      console.error('Login error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        fullError: err
-      });
-      const errorMessage = err.response?.data?.message 
-        || err.response?.data 
-        || err.message 
-        || 'Login failed. Please try again.';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+    );
+
+    console.log('Login response:', response.data);
+
+    if (response.data) {
+
+      // Save token
+      localStorage.setItem('adminToken', response.data.token);
+
+      // Save user data
+      localStorage.setItem('adminUser', JSON.stringify(response.data.data));
+
+      setIsSuccess(true);
+      setTimeout(() => navigate('/admin/dashboard'), 1500);
     }
-  };
+
+  } catch (err) {
+    console.error("Login error details:", {
+      message: err.message,
+      response: err.response?.data,
+      status: err.response?.status,
+      fullError: err,
+    });
+
+    setError(
+      err.response?.data?.message ||
+      err.response?.data ||
+      err.message ||
+      "Login failed. Please try again."
+    );
+
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
 
   const LoadingOverlay = () => (
     <Box

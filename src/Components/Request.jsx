@@ -12,49 +12,58 @@ const Request = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch data on load
-  useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.cashamsalone.com/admin/requests",
-          {
-            headers: {
-              Authorization: "Basic UGVhcmw6UGVhcmxQcm9kQ2hlY2tlckAxMjM5MA==",
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        setRequests(response.data);
-      } catch (err) {
-        setError("Failed to fetch data: " + err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRequests();
-  }, []);
-
-  // Approve request handler
-  const handleApprove = async (id) => {
+useEffect(() => {
+  const fetchRequests = async () => {
     try {
-      const url = `https://api.cashamsalone.com/admin/approve/${id}`;
-      await axios.put(url, null, {
-        headers: {
-          Authorization: "Basic UGVhcmw6UGVhcmxQcm9kQ2hlY2tlckAxMjM5MA==",
-          "Content-Type": "application/json",
-        },
-      });
-      setRequests((prevRequests) =>
-        prevRequests.map((request) =>
-          request.id === id
-            ? { ...request, approved: true, approvedAt: new Date().toISOString() }
-            : request
-        )
+      const token = localStorage.getItem("adminToken");
+
+      const response = await axios.get(
+        "https://api.cashamsalone.com/admin/requests",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
+
+      setRequests(response.data);
     } catch (err) {
-      setError("Failed to approve request: " + err.message);
+      setError("Failed to fetch data: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
+
+  fetchRequests();
+}, []);
+
+
+  // Approve request handler
+ const handleApprove = async (id) => {
+  try {
+    const token = localStorage.getItem("adminToken");
+
+    const url = `https://api.cashamsalone.com/admin/approve/${id}`;
+
+    await axios.put(url, null, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    setRequests((prevRequests) =>
+      prevRequests.map((request) =>
+        request.id === id
+          ? { ...request, approved: true, approvedAt: new Date().toISOString() }
+          : request
+      )
+    );
+  } catch (err) {
+    setError("Failed to approve request: " + err.message);
+  }
+};
 
   // Filter requests based on search query
   const filteredRequests = requests.filter((request) =>

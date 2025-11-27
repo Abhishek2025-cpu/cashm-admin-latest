@@ -24,16 +24,19 @@ const AddBalance = () => {
   const apiCallTimeout = useRef(null);
 
   // Fetch history on mount
-  useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/admin/history`, {
-        headers: {
-          Authorization: "Basic " + btoa("Pearl:PearlProdChecker@12390"),
-        },
-      })
-      .then((res) => setHistory(res.data))
-      .catch(() => console.error("Failed to fetch history"));
-  }, []);
+useEffect(() => {
+  const token = localStorage.getItem("adminToken");
+
+  axios
+    .get(`${API_BASE_URL}/admin/history`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => setHistory(res.data))
+    .catch(() => console.error("Failed to fetch history"));
+}, []);
+
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -54,60 +57,62 @@ const AddBalance = () => {
   }, []);
 
   // Debounced API call on phoneNumber change with minimum length check
-  useEffect(() => {
-    if (phoneNumber.length < 3) {
-      // Clear results and hide dropdown if input less than 3 digits
-      setApiResults([]);
-      setUserInfo(null);
-      setShowApiDropdown(false);
-      return;
-    }
+useEffect(() => {
+  if (phoneNumber.length < 3) {
+    setApiResults([]);
+    setUserInfo(null);
+    setShowApiDropdown(false);
+    return;
+  }
 
+  if (apiCallTimeout.current) {
+    clearTimeout(apiCallTimeout.current);
+  }
+
+  apiCallTimeout.current = setTimeout(() => {
+    const token = localStorage.getItem("adminToken");
+
+    axios
+      .get(
+        `${API_BASE_URL}/admin/user?num=${encodeURIComponent(phoneNumber)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((res) => {
+        console.log("API response data:", res.data);
+
+        const user = res.data;
+        if (user && user.phoneNumber) {
+          setApiResults([user]);
+          setShowApiDropdown(true);
+        } else {
+          setApiResults([]);
+          setShowApiDropdown(false);
+        }
+
+        setUserInfo(null);
+      })
+      .catch((err) => {
+        console.error("API call failed:", err);
+        setApiResults([]);
+        setShowApiDropdown(false);
+        setUserInfo(null);
+      });
+  }, 300);
+
+  return () => {
     if (apiCallTimeout.current) {
       clearTimeout(apiCallTimeout.current);
     }
-
-    apiCallTimeout.current = setTimeout(() => {
-      axios
-        .get(`${API_BASE_URL}/admin/user?num=${encodeURIComponent(phoneNumber)}`, {
-          headers: {
-            Authorization: "Basic " + btoa("Pearl:PearlProdChecker@12390"),
-          },
-        })
-        .then((res) => {
-          console.log("API response data:", res.data);
-
-          // API returns a single user object, wrap it in an array for dropdown
-          const user = res.data;
-          if (user && user.phoneNumber) {
-            setApiResults([user]);
-            setShowApiDropdown(true);
-          } else {
-            setApiResults([]);
-            setShowApiDropdown(false);
-          }
-          setUserInfo(null); // Clear userInfo until user selects from dropdown
-        })
-        .catch((err) => {
-          console.error("API call failed:", err);
-          setApiResults([]);
-          setShowApiDropdown(false);
-          setUserInfo(null);
-        });
-    }, 300);
-
-    return () => {
-      if (apiCallTimeout.current) {
-        clearTimeout(apiCallTimeout.current);
-      }
-    };
-  }, [phoneNumber]);
-
-  const handlePhoneNumberChange = (e) => {
-    const value = e.target.value;
-    setPhoneNumber(value);
-    setUserInfo(null);
   };
+}, [phoneNumber]);
+
+
+
+
 
   const handleSelectNumber = (selected) => {
     setPhoneNumber(selected.phoneNumber);
