@@ -124,52 +124,41 @@ useEffect(() => {
     setShowApiDropdown(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+const handleSubmit = async (e) => {
+e.preventDefault();
+setError("");
+setSuccess("");
 
-    if (!phoneNumber) {
-      setError("Please enter a phone number.");
-      return;
-    }
-    if (!amount) {
-      setError("Please enter an amount.");
-      return;
-    }
+if (!phoneNumber) {
+setError("Please enter a phone number.");
+return;
+}
+if (!amount) {
+setError("Please enter an amount.");
+return;
+}
 
-    try {
-      const formData = new FormData();
-      formData.append("phoneNumber", phoneNumber);
-      formData.append("amount", amount);
+try {
+const token = localStorage.getItem("adminToken"); // get bearer token
+const formData = new FormData();
+formData.append("phoneNumber", phoneNumber);
+formData.append("amount", amount);
 
-      await axios.post(`${API_BASE_URL}/admin/addBalance`, formData, {
-        headers: {
-          Authorization: "Basic " + btoa("Pearl:PearlProdChecker@12390"),
-        },
-      });
+await axios.post(`${API_BASE_URL}/admin/addBalance`, formData, {
+  headers: {
+    Authorization: `Bearer ${token}`, // use Bearer token
+  },
+});
 
-      setSuccess("Balance added successfully!");
-      setRows((prev) => [
-        {
-          phoneNumber: phoneNumber,
-          amount,
-          date: new Date().toLocaleString(),
-          recipientName: userInfo ? userInfo.userName : "Manually Added",
-          type: "Add",
-        },
-        ...prev,
-      ]);
-      setPhoneNumber("");
-      setAmount("");
-      setUserInfo(null);
-      setOpenForm(false);
-      setApiResults([]);
-      setShowApiDropdown(false);
-    } catch (err) {
-      setError("Failed to add balance.");
-    }
-  };
+setSuccess("Balance added successfully!");
+setPhoneNumber("");
+setAmount("");
+
+} catch (err) {
+console.error(err);
+setError(err.response?.data?.error || "Server error");
+}
+};
 
   const paginatedHistory = history
     .filter((h) => h.phoneNumber.includes(searchTerm))
@@ -215,7 +204,7 @@ useEffect(() => {
                   <input
                     type="text"
                     value={phoneNumber}
-                    onChange={handlePhoneNumberChange}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                     onFocus={() => {
                       if (apiResults.length > 0) setShowApiDropdown(true);
                     }}
